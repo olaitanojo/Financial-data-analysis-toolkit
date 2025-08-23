@@ -2,7 +2,8 @@
 """
 Financial Data Analysis Toolkit
 A comprehensive suite of financial analysis tools including market sentiment analysis,
-portfolio optimization, economic indicator tracking, and earnings prediction models.
+portfolio optimization, economic indicator tracking, earnings prediction models,
+advanced ML models, enhanced data sources, and interactive analytics.
 
 Author: olaitanojo
 """
@@ -19,8 +20,31 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 from textblob import TextBlob
+import asyncio
 import warnings
 warnings.filterwarnings('ignore')
+
+# Import enhanced modules
+try:
+    from advanced_ml_models import AdvancedStockPredictor
+    ML_MODELS_AVAILABLE = True
+except ImportError:
+    ML_MODELS_AVAILABLE = False
+    print("⚠️  Advanced ML models not available. Install required dependencies.")
+
+try:
+    from enhanced_data_sources import EnhancedDataProvider, create_data_source_config
+    DATA_SOURCES_AVAILABLE = True
+except ImportError:
+    DATA_SOURCES_AVAILABLE = False
+    print("⚠️  Enhanced data sources not available.")
+
+try:
+    from enhanced_analytics import EnhancedAnalytics, EnhancedVisualizer
+    ENHANCED_ANALYTICS_AVAILABLE = True
+except ImportError:
+    ENHANCED_ANALYTICS_AVAILABLE = False
+    print("⚠️  Enhanced analytics not available.")
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -599,7 +623,123 @@ def main():
     except Exception as e:
         print(f"Portfolio optimization error: {e}")
     
+    # Enhanced Features Demonstration
+    print("\n" + "="*60)
+    print("ENHANCED FEATURES")
+    print("="*60)
+    
+    # Advanced ML Models
+    if ML_MODELS_AVAILABLE:
+        print("\n🤖 ADVANCED ML PREDICTIONS")
+        print("-" * 30)
+        try:
+            predictor = AdvancedStockPredictor(ticker)
+            predictor.fetch_enhanced_data(period="1y")
+            predictor.prepare_features_target(target_days=1)
+            
+            # Train XGBoost model (quick version)
+            xgb_results = predictor.train_xgboost_model(hyperparameter_tuning=False)
+            print(f"XGBoost R² Score: {xgb_results['test_r2']:.4f}")
+            print(f"XGBoost MAE: {xgb_results['test_mae']:.4f}")
+            
+            # Make predictions
+            predictions = predictor.predict_with_all_models()
+            for model_name, pred in predictions.items():
+                print(f"{model_name.title()} Prediction: {pred:.2f}% price change")
+                
+        except Exception as e:
+            print(f"ML models error: {e}")
+    
+    # Enhanced Analytics
+    if ENHANCED_ANALYTICS_AVAILABLE:
+        print("\n📊 ENHANCED ANALYTICS")
+        print("-" * 30)
+        try:
+            # Get stock data
+            stock = yf.Ticker(ticker)
+            data = stock.history(period="1y")
+            
+            # Initialize analytics
+            analytics = EnhancedAnalytics()
+            analytics.load_data(data)
+            
+            # Calculate advanced metrics
+            metrics = analytics.calculate_advanced_metrics()
+            print(f"Sharpe Ratio: {metrics['sharpe_ratio']:.3f}")
+            print(f"Max Drawdown: {metrics['max_drawdown']:.2f}%")
+            print(f"VaR (95%): {metrics['var_95']:.2f}%")
+            
+            # Technical analysis
+            technical = analytics.technical_analysis()
+            print(f"RSI: {technical['momentum']['rsi']:.1f}")
+            print(f"Trend Strength: {technical['trend_analysis']['trend_strength']:.1f}")
+            
+            # Create visualizations
+            visualizer = EnhancedVisualizer()
+            chart = visualizer.create_comprehensive_chart(data, f"{ticker} Enhanced Analysis")
+            chart.write_html(f"{ticker}_enhanced_chart.html")
+            print(f"Enhanced chart saved as {ticker}_enhanced_chart.html")
+            
+        except Exception as e:
+            print(f"Enhanced analytics error: {e}")
+    
+    # Enhanced Data Sources (async demo)
+    if DATA_SOURCES_AVAILABLE:
+        print("\n📡 ENHANCED DATA SOURCES")
+        print("-" * 30)
+        try:
+            async def demo_data_sources():
+                config = create_data_source_config()
+                async with EnhancedDataProvider(config) as provider:
+                    # Economic data
+                    gdp_data = await provider.fetch_economic_data('GDP_GROWTH')
+                    print(f"GDP data points: {len(gdp_data)}")
+                    
+                    # News sentiment
+                    sentiment_data = await provider.fetch_news_sentiment(ticker)
+                    print(f"Sentiment data points: {len(sentiment_data)}")
+                    print(f"Average sentiment: {sentiment_data['sentiment_score'].mean():.3f}")
+                    
+                    # Options data
+                    options_data = await provider.fetch_options_data(ticker)
+                    print(f"Options contracts: {len(options_data)}")
+            
+            # Run async demo
+            asyncio.run(demo_data_sources())
+            
+        except Exception as e:
+            print(f"Enhanced data sources error: {e}")
+    
+    print("\n✅ All analyses completed successfully!")
     logger.info("Financial Data Analysis Toolkit completed")
+
+async def run_enhanced_demo():
+    """Run enhanced features demo with async support"""
+    print("Running Enhanced Financial Analysis Demo...")
+    
+    if DATA_SOURCES_AVAILABLE:
+        config = create_data_source_config()
+        async with EnhancedDataProvider(config) as provider:
+            ticker = "AAPL"
+            
+            # Fetch enhanced data
+            stock_data = await provider.fetch_stock_data(ticker)
+            print(f"Fetched {len(stock_data)} stock records")
+            
+            # Quality assessment
+            quality = provider.get_data_quality_score(stock_data, ticker)
+            print(f"Data quality: {quality['quality_score']:.1f}/100")
+            
+            # Multiple data types
+            sentiment_data = await provider.fetch_news_sentiment(ticker)
+            options_data = await provider.fetch_options_data(ticker)
+            insider_data = await provider.fetch_insider_trading(ticker)
+            
+            print(f"Sentiment records: {len(sentiment_data)}")
+            print(f"Options contracts: {len(options_data)}")
+            print(f"Insider transactions: {len(insider_data)}")
+    
+    print("Enhanced demo completed!")
 
 if __name__ == "__main__":
     main()
